@@ -15,6 +15,7 @@ class ClientHandler implements Runnable {
     // constructor 
     public ClientHandler(Socket socket, String name,
                          DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
+        Server.clientsConnected++;
         this.dataInputStream = dataInputStream;
         this.dataOutputStream = dataOutputStream;
         this.name = name;
@@ -30,7 +31,7 @@ class ClientHandler implements Runnable {
         stringBuilder.append("Welcome to this chat program").append(newLine);
         stringBuilder.append("There are currently ").append(Server.clientsConnected).append(" clients online").append(newLine);
         stringBuilder.append("Chat syntax: \"your_message#client_name\"").append(newLine);
-        stringBuilder.append("Available commands: #name, #welcome").append(newLine);
+        stringBuilder.append("Available commands: /name, /welcome, /logout").append(newLine);
         stringBuilder.append("The following clients are currently connected: ").append(Server.clientHandlerVector.toString()).append(newLine);
         stringBuilder.append("pleeease enjoy your staaay").append(newLine);
 
@@ -48,23 +49,21 @@ class ClientHandler implements Runnable {
             e.printStackTrace();
         }
 
-        while (true)
-        {
+        while (true) {
 
-            try
-            {
+            try {
                 // receive the string 
                 textFromClient = dataInputStream.readUTF();
 
                 System.out.println(textFromClient);
 
-                if(textFromClient.equals("#logout")){
+                if(textFromClient.equals("/logout")) {
                     this.isLoggedIn = false;
                     this.socket.close();
                     break;
                 }
 
-                if(textFromClient.equals("#name")) {
+                if(textFromClient.equals("/name")) {
                     textFromClient = dataInputStream.readUTF();
 
                     name = textFromClient;
@@ -74,23 +73,21 @@ class ClientHandler implements Runnable {
                     continue;
                 }
 
-                if(textFromClient.equals("#welcome")) {
+                if(textFromClient.equals("/welcome")) {
                     welcomeMessage();
                     continue;
                 }
 
                 // todo: error handling ift. stringTokenizer pattern
                 // break the string into message and recipient part 
-                StringTokenizer stringTokenizer = new StringTokenizer(textFromClient, "#");
+                StringTokenizer stringTokenizer = new StringTokenizer(textFromClient, "/");
                 String msgToSend = stringTokenizer.nextToken();
                 String recipient = stringTokenizer.nextToken();
 
                 // search for the recipient in the connected devices list.
-                for (ClientHandler clientHandler : Server.clientHandlerVector)
-                {
+                for (ClientHandler clientHandler : Server.clientHandlerVector) {
                     // if the recipient is found, write on its output stream
-                    if (clientHandler.name.equals(recipient) && clientHandler.isLoggedIn)
-                    {
+                    if (clientHandler.name.equals(recipient) && clientHandler.isLoggedIn) {
                         clientHandler.dataOutputStream.writeUTF(this.name+ ": " + msgToSend);
                         break;
                     }
@@ -100,13 +97,16 @@ class ClientHandler implements Runnable {
             }
 
         }
-        try
-        {
-            // closing resources 
+
+        // decrement connected clients when ClientHandler stops running
+        Server.clientsConnected--;
+
+        try {
+            // closing resources
             this.dataInputStream.close();
             this.dataOutputStream.close();
 
-        }catch(IOException e){
+        } catch(IOException e){
             e.printStackTrace();
         }
     }

@@ -34,23 +34,18 @@ public class Server {
             System.out.println("Creating a new handler for this client...");
 
             // Create a new handler object for handling this request. 
-            ClientHandler mtch = new ClientHandler(s,"client " + clientsConnected, dis, dos);
+            ClientHandler clientHandler = new ClientHandler(s,"client " + (clientsConnected + 1), dis, dos);
 
             // Create a new Thread with this object. 
-            Thread t = new Thread(mtch);
+            Thread thread = new Thread(clientHandler);
 
             System.out.println("Adding this client to active client list");
 
             // add this client to active clients list 
-            clientHandlerVector.add(mtch);
+            clientHandlerVector.add(clientHandler);
 
             // start the thread. 
-            t.start();
-
-            // increment i for new client. 
-            // i is used for naming only, and can be replaced 
-            // by any naming scheme 
-            clientsConnected++;
+            thread.start();
         }
     }
 } 

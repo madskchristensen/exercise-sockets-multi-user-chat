@@ -23,7 +23,7 @@ public class Client
         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
         // sendMessage thread 
-        Thread sendMessage = new Thread(() -> {
+        Thread threadSendMessage = new Thread(() -> {
 
             while (true) {
 
@@ -41,7 +41,7 @@ public class Client
         });
 
         // readMessage thread 
-        Thread readMessage = new Thread(() -> {
+        Thread threadReadMessage = new Thread(() -> {
 
             while (true) {
                 try {
@@ -56,7 +56,7 @@ public class Client
             }
         });
 
-        sendMessage.start();
-        readMessage.start();
+        threadSendMessage.start();
+        threadReadMessage.start();
     }
 }
